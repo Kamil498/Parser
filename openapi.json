@@ -1,0 +1,20 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "My App",
+        "description": "This is an awesome app!",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/add-book": {
+            "post": {
+                "operationId": "post_add_book",
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        }
+    }
+}
