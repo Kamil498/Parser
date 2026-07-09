@@ -46,19 +46,33 @@ class BookPriceQueueCommand extends Command
             return Command::SUCCESS;
         }
 
+        $queued=0;
         foreach ($books as $book) {
 
+            $lockKey="queue:book:{$book->getId()}";
+
+            $locked=$this->redis->set(
+                $lockKey,
+                1,
+                'EX',
+                3600,
+                'NX'
+            );
+
+            if(!$locked){
+                continue;
+            }
             $payload = [
                 'id' => $book->getId(),
                 'url' => $book->getUrl(),
                 'shop' => $book->getShop(),
             ];
 
-            $this->redis->rPush($this->queue, json_encode($payload)
-            );
+            $this->redis->rPush($this->queue, json_encode($payload));
+            $queued++;
         }
 
-        $output->writeln('<info>Queued ' . count($books) . ' books</info>');
+        $output->writeln("<info>Queued {$queued} books</info>");
 
         return Command::SUCCESS;
     }

@@ -18,25 +18,29 @@ use Symfony\Component\Console\Output\OutputInterface;
 class BookPriceWorkerCommand extends Command
 {
     private string $queue = 'book-price-queue';
+    private string $processingQueue = 'book-price-processing';
 
-    private EntityManagerInterface $em;
-    private Client $redis;
-
-    public function __construct(EntityManagerInterface $em, Client $redis)
+    public function __construct(private EntityManagerInterface $em, private Client $redis)
     {
         parent::__construct();
-        $this->em = $em;
-        $this->redis = $redis;
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+
+        while ($item = $this->redis->rpop($this->processingQueue)) {
+            $this->redis->lpush($this->queue, $item);
+        }
+
         while (true) {
 
-            $item = $this->redis->lPop($this->queue);
+            $item = $this->redis->brpoplpush(
+                $this->queue,
+                $this->processingQueue,
+                5
+            );
 
             if (!$item) {
-                sleep(2);
                 continue;
             }
 
@@ -46,31 +50,55 @@ class BookPriceWorkerCommand extends Command
 
             $output->writeln("Processing book ID: {$bookId}");
 
-            /** @var Book|null $book */
+
             $book = $this->em->getRepository(Book::class)->find($bookId);
 
             if (!$book) {
+
+                $this->redis->lrem(
+                    $this->processingQueue,
+                    1,
+                    $item
+                );
+
+                $this->redis->del("queue:book:$bookId");
+
                 continue;
             }
 
+            try {
 
-            $price = $this->fetchPrice($book->getUrl());
+                $price = $this->fetchPrice($book->getUrl());
 
+                $history = new PriceHistory();
+                $history->setBook($book);
+                $history->setPrice($price);
+                $history->setCheckedAt(new \DateTimeImmutable());
 
-            $history = new PriceHistory();
-            $history->setBook($book);
-            $history->setPrice($price);
-            $history->setCheckedAt(new \DateTimeImmutable());
+                $this->em->persist($history);
 
-            $this->em->persist($history);
+                $book->setNextCheckedTime(
+                    new \DateTimeImmutable('+6 hours')
+                );
 
+                $this->em->flush();
 
-            $book->setNextCheckedTime(
-                new \DateTimeImmutable('+6 hours')
-            );
+                $this->redis->lrem(
+                    $this->processingQueue,
+                    1,
+                    $item
+                );
 
-            $this->em->flush();
-            $this->em->clear();
+                $this->redis->del("queue:book:$bookId");
+
+                $this->em->clear();
+
+            } catch (\Throwable $e) {
+
+                $output->writeln("<error>{$e->getMessage()}</error>");
+
+                $this->em->clear();
+            }
         }
 
         return Command::SUCCESS;
@@ -78,7 +106,6 @@ class BookPriceWorkerCommand extends Command
 
     private function fetchPrice(string $url): float
     {
-
         return rand(10, 200);
     }
 }
