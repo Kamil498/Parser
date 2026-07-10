@@ -3,69 +3,103 @@
 namespace App\Controller;
 
 use App\Entity\Book;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use App\Enum\Shop;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
 
-class AddBookController
+class AddBookController extends AbstractController
 {
+    #[Route('/books/add', name: 'book_add_form', methods: ['GET'])]
+    public function form(): Response
+    {
+        return $this->render('book/add.html.twig');
+    }
 
-    #[Route(path:"api/add-book", name:"add_book", methods:['POST'])]
+    #[Route(path:'/api/add-book', name: 'add_book', methods: ['POST'])]
     #[OA\Post(
         path: "/api/add-book",
-        summary: "Add a new book",
+        summary: "Dodaje nową książkę do monitorowania",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
+                required: ["url"],
                 properties: [
-                    new OA\Property(property: "url", type: "string"),
-                    new OA\Property(property: "shop", type: "string"),
-                    new OA\Property(property: "is_active", type: "boolean"),
-                    new OA\Property(property: "created_at", type: "string"),
-                    new OA\Property(property: "updated_at", type: "string"),
-                ],
-                required: ["url", "shop", "is_active", "created_at", "updated_at"]
+                    new OA\Property(
+                        property: "url",
+                        type: "string",
+                        example: "https://www.empik.com/przykladowa-ksiazka"
+                    )
+                ]
             )
-
         ),
-        responses:
-        new OA\Response(
-            response: 200,
-            description: "Book added successfully"
-        )
-
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Book added successfully"
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Invalid request"
+            )
+        ]
     )]
-    public function add(EntityManagerInterface $em, Request $request){
+    public function add(
+        Request $request,
+        EntityManagerInterface $em
+    ): JsonResponse {
 
-        $data=json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true);
 
-        if(!isset($data['url']) || !isset($data['shop']) || !isset($data['is_active']) || !isset($data['created_at']) || !isset($data['updated_at'])){
-            throw new BadRequestHttpException();
+        if (empty($data['url'])) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Pole url jest wymagane.'
+            ], 400);
         }
+
+        try {
+            $shop = Shop::fromUrl($data['url']);
+        } catch (\InvalidArgumentException $e) {
+            return $this->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+        $exists=$em->getRepository(Book::class)->findOneBy(['url' => $data['url']]);
+
+        if($exists)
+        {
+            return $this->json([
+                'success' => false,
+                'message' => 'Book already exists'
+            ], 400);
+        }
+
+        $now = new \DateTimeImmutable();
 
         $book = new Book();
-        $book->setUrl($data['url']);
-        $book->setShop($data['shop']);
-        $book->setIsActive($data['is_active']);
-        $book->setCreatedAt($data['created_at']);
-        $book->setUpdatedAt($data['updated_at']);
 
-        try{
-            $em->persist($book);
-            $em->flush();
-        }
-        catch (UniqueConstraintViolationException){
-            throw new BadRequestHttpException();
-        }
+        $book->setUrl($data['url']);
+        $book->setShop($shop->value);
+        $book->setIsActive(true);
+        $book->setCreatedAt($now);
+        $book->setUpdatedAt($now);
+        $book->setNextCheckedTime($now);
+
+        $em->persist($book);
+        $em->flush();
 
         return $this->json([
             'success' => true,
-            'book' => $book
+            'id' => $book->getId(),
+            'shop' => $shop->value,
+            'url' => $book->getUrl()
         ]);
-
     }
 
 
