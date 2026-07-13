@@ -10,10 +10,18 @@ class PriceExtractor
     {
         $crawler = new Crawler($html);
 
-        $price = $crawler->filterXPath(
-            '//span[contains(@class,"ProductPrice-PriceValue")]/text()'
-        )->text();
+        $nodes = $crawler->filterXPath(
+            '//span[contains(@class,"ProductPrice-PriceValue")]'
+        );
+        dump($crawler->filter('span')->count());
 
+        if ($nodes->count() === 0) {
+            throw new \RuntimeException(
+                'Price not found'
+            );
+        }
+
+        $price = $nodes->first()->text();
 
         $price = preg_replace(
             '/[^0-9,.]/',
@@ -21,11 +29,12 @@ class PriceExtractor
             $price
         );
 
+        if ($price === '') {
+            throw new \RuntimeException(
+                'Price value empty'
+            );
+        }
 
-        return (float)str_replace(
-            ',',
-            '.',
-            $price
-        );
+        return (float) str_replace(',', '.', $price);
     }
 }

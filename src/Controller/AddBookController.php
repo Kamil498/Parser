@@ -55,7 +55,7 @@ class AddBookController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
-        if (empty($data['url'])) {
+        if (!isset($data['url'])) {
             return $this->json([
                 'success' => false,
                 'message' => 'Pole url jest wymagane.'

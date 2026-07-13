@@ -61,7 +61,22 @@ class BookPriceWorkerCommand extends Command
 
 
             try {
+
+                $output->writeln('Start pobierania');
+
                 $html = $this->downloader->download($book->getUrl());
+
+                file_put_contents('bookland.html', $html);
+
+                dump(substr($html, 0, 1500));
+
+                $path = getcwd() . '/bookland.html';
+
+                file_put_contents($path, $html);
+
+                dump($path);
+
+
                 $output->writeln('HTML pobrany');
 
                 $price = $this->extractor->extract(

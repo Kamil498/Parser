@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Dodaj książkę</title>
+
+    <style>
+        body{
+            font-family: Arial,sans-serif;
+            width:700px;
+            margin:50px auto;
+        }
+
+        input{
+            width:100%;
+            padding:12px;
+            font-size:16px;
+            box-sizing:border-box;
+        }
+
+        button{
+            margin-top:15px;
+            padding:12px 20px;
+            cursor:pointer;
+            font-size:16px;
+        }
+
+        #result{
+            margin-top:20px;
+            background:#f4f4f4;
+            padding:15px;
+            border-radius:5px;
+
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Dodaj książkę do monitorowania</h1>
+
+<input
+    id="url"
+    type="text"
+    placeholder="Wklej link do książki">
+
+<button id="add">
+    Dodaj
+</button>
+
+<pre id="result"></pre>
+
+<script>
+
+    document.getElementById('add').addEventListener('click', async () => {
+
+        const url = document.getElementById('url').value;
+
+        const response = await fetch('http://127.0.0.1:8000/api/add-book', {
+
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify({
+                url: url
+            })
+
+        });
+
+        const result = await response.json();
+
+        document.getElementById('result').textContent =
+            JSON.stringify(result, null, 4);
+
+    });
+
+</script>
+
+</body>
+</html>
