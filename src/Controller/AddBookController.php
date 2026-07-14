@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Book;
+use App\Entity\ProductBook;
 use App\Enum\Shop;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
@@ -70,7 +71,7 @@ class AddBookController extends AbstractController
                 'message' => $e->getMessage()
             ], 400);
         }
-        $exists=$em->getRepository(Book::class)->findOneBy(['url' => $data['url']]);
+        $exists=$em->getRepository(ProductBook::class)->findOneBy(['url' => $data['url']]);
 
         if($exists)
         {
@@ -82,14 +83,14 @@ class AddBookController extends AbstractController
 
         $now = new \DateTimeImmutable();
 
-        $book = new Book();
+
+
+        $book = new ProductBook();
 
         $book->setUrl($data['url']);
         $book->setShop($shop->value);
-        $book->setIsActive(true);
-        $book->setCreatedAt($now);
-        $book->setUpdatedAt($now);
-        $book->setNextCheckedTime($now);
+        $book->setStatus('pending');
+
 
         $em->persist($book);
         $em->flush();

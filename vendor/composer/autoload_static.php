@@ -21,6 +21,7 @@ class ComposerStaticInit75e7f8d848176580e9902a32f6f14640
         'f844ccf1d25df8663951193c3fc307c8' => __DIR__ . '/..' . '/twig/twig/src/Resources/string_loader.php',
         '2203a247e6fda86070a5e4e07aed533a' => __DIR__ . '/..' . '/symfony/clock/Resources/now.php',
         '9d2b9fc6db0f153a0a149fefb182415e' => __DIR__ . '/..' . '/symfony/polyfill-php84/bootstrap.php',
+        '2a3c2110e8e0295330dc3d11a4cbc4cb' => __DIR__ . '/..' . '/php-webdriver/webdriver/lib/Exception/TimeoutException.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -48,6 +49,7 @@ class ComposerStaticInit75e7f8d848176580e9902a32f6f14640
             'Symfony\\Flex\\' => 13,
             'Symfony\\Contracts\\Translation\\' => 30,
             'Symfony\\Contracts\\Service\\' => 26,
+            'Symfony\\Contracts\\HttpClient\\' => 29,
             'Symfony\\Contracts\\EventDispatcher\\' => 34,
             'Symfony\\Contracts\\Cache\\' => 24,
             'Symfony\\Component\\Yaml\\' => 23,
@@ -60,11 +62,13 @@ class ComposerStaticInit75e7f8d848176580e9902a32f6f14640
             'Symfony\\Component\\Routing\\' => 26,
             'Symfony\\Component\\PropertyInfo\\' => 31,
             'Symfony\\Component\\Process\\' => 26,
+            'Symfony\\Component\\Panther\\' => 26,
             'Symfony\\Component\\OptionsResolver\\' => 34,
             'Symfony\\Component\\Messenger\\Bridge\\Redis\\' => 41,
             'Symfony\\Component\\Messenger\\' => 28,
             'Symfony\\Component\\HttpKernel\\' => 29,
             'Symfony\\Component\\HttpFoundation\\' => 33,
+            'Symfony\\Component\\HttpClient\\' => 29,
             'Symfony\\Component\\Finder\\' => 25,
             'Symfony\\Component\\Filesystem\\' => 29,
             'Symfony\\Component\\EventDispatcher\\' => 34,
@@ -77,6 +81,7 @@ class ComposerStaticInit75e7f8d848176580e9902a32f6f14640
             'Symfony\\Component\\Config\\' => 25,
             'Symfony\\Component\\Clock\\' => 24,
             'Symfony\\Component\\Cache\\' => 24,
+            'Symfony\\Component\\BrowserKit\\' => 29,
             'Symfony\\Bundle\\TwigBundle\\' => 26,
             'Symfony\\Bundle\\MakerBundle\\' => 27,
             'Symfony\\Bundle\\FrameworkBundle\\' => 31,
@@ -110,6 +115,10 @@ class ComposerStaticInit75e7f8d848176580e9902a32f6f14640
         'M' => 
         array (
             'Masterminds\\' => 12,
+        ),
+        'F' => 
+        array (
+            'Facebook\\WebDriver\\' => 19,
         ),
         'D' => 
         array (
@@ -189,6 +198,10 @@ class ComposerStaticInit75e7f8d848176580e9902a32f6f14640
         array (
             0 => __DIR__ . '/..' . '/symfony/service-contracts',
         ),
+        'Symfony\\Contracts\\HttpClient\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/http-client-contracts',
+        ),
         'Symfony\\Contracts\\EventDispatcher\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/event-dispatcher-contracts',
@@ -237,6 +250,10 @@ class ComposerStaticInit75e7f8d848176580e9902a32f6f14640
         array (
             0 => __DIR__ . '/..' . '/symfony/process',
         ),
+        'Symfony\\Component\\Panther\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/panther/src',
+        ),
         'Symfony\\Component\\OptionsResolver\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/options-resolver',
@@ -256,6 +273,10 @@ class ComposerStaticInit75e7f8d848176580e9902a32f6f14640
         'Symfony\\Component\\HttpFoundation\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/http-foundation',
+        ),
+        'Symfony\\Component\\HttpClient\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/http-client',
         ),
         'Symfony\\Component\\Finder\\' => 
         array (
@@ -304,6 +325,10 @@ class ComposerStaticInit75e7f8d848176580e9902a32f6f14640
         'Symfony\\Component\\Cache\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/cache',
+        ),
+        'Symfony\\Component\\BrowserKit\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/browser-kit',
         ),
         'Symfony\\Bundle\\TwigBundle\\' => 
         array (
@@ -376,6 +401,10 @@ class ComposerStaticInit75e7f8d848176580e9902a32f6f14640
         'Masterminds\\' => 
         array (
             0 => __DIR__ . '/..' . '/masterminds/html5/src',
+        ),
+        'Facebook\\WebDriver\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-webdriver/webdriver/lib',
         ),
         'Doctrine\\SqlFormatter\\' => 
         array (

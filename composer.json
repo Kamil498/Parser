@@ -76,6 +76,7 @@
         }
     },
     "require-dev": {
-        "symfony/maker-bundle": "^1.67"
+        "symfony/maker-bundle": "^1.67",
+        "symfony/panther": "^2.4"
     }
 }

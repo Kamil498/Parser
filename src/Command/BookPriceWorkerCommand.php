@@ -58,6 +58,7 @@ class BookPriceWorkerCommand extends Command
 
                 continue;
             }
+            dump($book->getUrl());
 
 
             try {
@@ -110,8 +111,18 @@ class BookPriceWorkerCommand extends Command
                 $this->em->clear();
 
             } catch (\Throwable $e) {
-                dump($e);
-                throw $e;
+
+                $output->writeln(
+                    '<error>' . $e->getMessage() . '</error>'
+                );
+
+                $this->redis->lrem(
+                    $this->processingQueue,
+                    1,
+                    $item
+                );
+
+                continue;
             }
         }
 

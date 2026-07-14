@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '1b03f4d93c5c537ba51fea15878dd13aa9f94acd',
+        'reference' => 'a65f179912a2ea7023fe45ee16bb897b932a7eb7',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '__root__' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '1b03f4d93c5c537ba51fea15878dd13aa9f94acd',
+            'reference' => 'a65f179912a2ea7023fe45ee16bb897b932a7eb7',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -136,6 +136,12 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'facebook/webdriver' => array(
+            'dev_requirement' => true,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
         'masterminds/html5' => array(
             'pretty_version' => '2.10.1',
             'version' => '2.10.1.0',
@@ -162,6 +168,27 @@
             'install_path' => __DIR__ . '/../nikic/php-parser',
             'aliases' => array(),
             'dev_requirement' => false,
+        ),
+        'php-http/async-client-implementation' => array(
+            'dev_requirement' => true,
+            'provided' => array(
+                0 => '*',
+            ),
+        ),
+        'php-http/client-implementation' => array(
+            'dev_requirement' => true,
+            'provided' => array(
+                0 => '*',
+            ),
+        ),
+        'php-webdriver/webdriver' => array(
+            'pretty_version' => '1.16.0',
+            'version' => '1.16.0.0',
+            'reference' => 'ac0662863aa120b4f645869f584013e4c4dba46a',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-webdriver/webdriver',
+            'aliases' => array(),
+            'dev_requirement' => true,
         ),
         'phpdocumentor/reflection-common' => array(
             'pretty_version' => '2.2.0',
@@ -268,6 +295,12 @@
                 0 => '1.0',
             ),
         ),
+        'psr/http-client-implementation' => array(
+            'dev_requirement' => true,
+            'provided' => array(
+                0 => '1.0',
+            ),
+        ),
         'psr/http-message' => array(
             'pretty_version' => '2.0',
             'version' => '2.0.0.0',
@@ -306,6 +339,15 @@
             'install_path' => __DIR__ . '/../radebatz/type-info-extras',
             'aliases' => array(),
             'dev_requirement' => false,
+        ),
+        'symfony/browser-kit' => array(
+            'pretty_version' => 'v7.4.14',
+            'version' => '7.4.14.0',
+            'reference' => 'bb28e8761a6c33975972948010f00d4a10f0a634',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/browser-kit',
+            'aliases' => array(),
+            'dev_requirement' => true,
         ),
         'symfony/cache' => array(
             'pretty_version' => 'v7.4.14',
@@ -481,6 +523,30 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'symfony/http-client' => array(
+            'pretty_version' => 'v7.4.14',
+            'version' => '7.4.14.0',
+            'reference' => 'f6bc6b5a54ff5afac4725cacec9bf2f52eb15920',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/http-client',
+            'aliases' => array(),
+            'dev_requirement' => true,
+        ),
+        'symfony/http-client-contracts' => array(
+            'pretty_version' => 'v3.7.1',
+            'version' => '3.7.1.0',
+            'reference' => '41fc42d276aeff21192465331ebbab7d83a743c0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/http-client-contracts',
+            'aliases' => array(),
+            'dev_requirement' => true,
+        ),
+        'symfony/http-client-implementation' => array(
+            'dev_requirement' => true,
+            'provided' => array(
+                0 => '3.0',
+            ),
+        ),
         'symfony/http-foundation' => array(
             'pretty_version' => 'v7.4.14',
             'version' => '7.4.14.0',
@@ -525,6 +591,15 @@
             'install_path' => __DIR__ . '/../symfony/options-resolver',
             'aliases' => array(),
             'dev_requirement' => false,
+        ),
+        'symfony/panther' => array(
+            'pretty_version' => 'v2.4.0',
+            'version' => '2.4.0.0',
+            'reference' => '2d810395942e71aea2f7ea8e8b5f82326bb4b8b4',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/panther',
+            'aliases' => array(),
+            'dev_requirement' => true,
         ),
         'symfony/polyfill-ctype' => array(
             'dev_requirement' => false,
