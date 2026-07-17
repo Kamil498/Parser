@@ -2,9 +2,9 @@
 
 namespace App\Command;
 
-use App\Entity\ProductBook;
+use App\Entity\TaniaKsiazka;
 use App\Service\PageDownloader;
-use App\Service\ProductExtractor;
+use App\Service\TaniaExtract;
 use Doctrine\ORM\EntityManagerInterface;
 use Predis\Client;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -13,47 +13,41 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'bookland-worker',
-    description: 'Process book products from the queue',
+    name: 'tania:worker',
+    description: 'Process books from queue'
 )]
 
-class BookProductWorkerCommand extends Command
+class TaniaWorkerCommand extends Command
 {
+    private string $queue="tania-ksiazka-queue";
 
-
-
-    private string $queue = 'book_product_queue';
-    private string $processed = 'book_product_processed';
+    private string $processed="tania-ksiazka-processed";
 
     public function __construct(
         private EntityManagerInterface $em,
         private Client $redis,
         private PageDownloader $downloader,
-        private ProductExtractor $extractor)
+        private TaniaExtract $extract
+    )
     {
         parent::__construct();
-        $this->redis = $redis;
-        $this->em = $em;
-        $this->downloader = $downloader;
-        $this->extractor = $extractor;
     }
 
-    public function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input,OutputInterface $output): int
     {
-        while (true) {
+        while(true){
             $item=$this->redis->brpoplpush(
                 $this->queue,
                 $this->processed,
                 5
             );
-
-            if(!$item){
+            if($item){
                 continue;
             }
 
-            $data = json_decode($item, true);
+            $data=json_decode($item,true);
 
-            $product = $this->em->getRepository(ProductBook::class)->find($data['id']);
+            $product=$this->em->getRepository(TaniaKsiazka::class)->find($data['id']);
 
             if (!$product) {
                 $this->redis->lrem(
@@ -77,23 +71,23 @@ class BookProductWorkerCommand extends Command
 
 
                 $product->setTytul(
-                    $data['tytul'] ?? 'Brak tytułu'
+                    $data['tytul']
                 );
 
                 $product->setAutor(
-                    $data['autor'] ?? null
+                    $data['autor']
                 );
 
                 $product->setWydawnictwo(
-                    $data['wydawnictwo'] ?? null
+                    $data['wydawnictwo']
                 );
 
                 $product->setRokWydania(
-                    $data['rok_wydania'] ?? null
+                    $data['rok_wydania']
                 );
 
                 $product->setCena(
-                    $data['cena'] ?? null
+                    $data['cena']
                 );
 
 

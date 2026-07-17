@@ -2,9 +2,9 @@
 
 namespace App\Command;
 
-use App\Entity\ProductBook;
+use App\Entity\Empik;
+use App\Service\EmpikExtractor;
 use App\Service\PageDownloader;
-use App\Service\ProductExtractor;
 use Doctrine\ORM\EntityManagerInterface;
 use Predis\Client;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -12,36 +12,30 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+
 #[AsCommand(
-    name: 'bookland-worker',
-    description: 'Process book products from the queue',
+    name: 'empik:worker',
+    description: 'Process books from queue'
 )]
 
-class BookProductWorkerCommand extends Command
+class EmpikWorkerCommand extends Command
 {
-
-
-
     private string $queue = 'book_product_queue';
     private string $processed = 'book_product_processed';
 
-    public function __construct(
-        private EntityManagerInterface $em,
-        private Client $redis,
-        private PageDownloader $downloader,
-        private ProductExtractor $extractor)
+    public function __construct(private EntityManagerInterface $em,
+                                   private Client $redis,
+                                   private PageDownloader $downloader,
+                                   private EmpikExtractor $extractor )
     {
         parent::__construct();
-        $this->redis = $redis;
-        $this->em = $em;
-        $this->downloader = $downloader;
-        $this->extractor = $extractor;
     }
 
-    public function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input,OutputInterface $output): int
     {
-        while (true) {
-            $item=$this->redis->brpoplpush(
+
+        while(true){
+            $item=$this->brpoplpush(
                 $this->queue,
                 $this->processed,
                 5
@@ -51,11 +45,12 @@ class BookProductWorkerCommand extends Command
                 continue;
             }
 
-            $data = json_decode($item, true);
+         $data=json_decode($item,true);
 
-            $product = $this->em->getRepository(ProductBook::class)->find($data['id']);
+            $product=$this->em->getRepository(Empik::class)->find($data['id']);
 
-            if (!$product) {
+            if(!$product){
+
                 $this->redis->lrem(
                     $this->processed,
                     1,
@@ -64,17 +59,15 @@ class BookProductWorkerCommand extends Command
                 continue;
             }
 
+
             try{
                 $output->writeln('Product download ' .$product->getUrl());
 
-                $product->setStatus('processing');
+                $product->setStatus("processing");
 
-                $html=$this->downloader->download(
-                    $product->getUrl()
-                );
+                $html=$this->downloader->download($data['url']);
 
-                $data = $this->extractor->extract($html);
-
+                $data=$this->extractor->extract($html);
 
                 $product->setTytul(
                     $data['tytul'] ?? 'Brak tytułu'
@@ -102,7 +95,6 @@ class BookProductWorkerCommand extends Command
 
                 $this->em->flush();
 
-
                 $this->redis->lrem(
                     $this->processed,
                     1,
@@ -110,13 +102,7 @@ class BookProductWorkerCommand extends Command
                 );
 
 
-                $this->redis->del(
-                    "book_product:" . $product->getId()
-                );
-
-
-                $output->writeln('OK');
-
+                $this->redis->del("book-product" . $product->getId());
             }catch(\Exception $e){
 
                 $product->setStatus('error');
@@ -132,11 +118,10 @@ class BookProductWorkerCommand extends Command
                 );
 
                 continue;
-
             }
-
-
         }
+
+
 
         return Command::SUCCESS;
     }

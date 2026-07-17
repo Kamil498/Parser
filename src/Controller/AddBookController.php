@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Bonito;
 use App\Entity\Book;
 use App\Entity\ProductBook;
 use App\Enum\Shop;
@@ -71,7 +72,7 @@ class AddBookController extends AbstractController
                 'message' => $e->getMessage()
             ], 400);
         }
-        $exists=$em->getRepository(ProductBook::class)->findOneBy(['url' => $data['url']]);
+        $exists=$em->getRepository(Bonito::class)->findOneBy(['url' => $data['url']]);
 
         if($exists)
         {
@@ -85,7 +86,7 @@ class AddBookController extends AbstractController
 
 
 
-        $book = new ProductBook();
+        $book = new Bonito();
 
         $book->setUrl($data['url']);
         $book->setShop($shop->value);

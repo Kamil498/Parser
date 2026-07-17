@@ -2,9 +2,9 @@
 
 namespace App\Command;
 
-use App\Entity\ProductBook;
+use App\Entity\Bonito;
+use App\Service\BonitoExtractor;
 use App\Service\PageDownloader;
-use App\Service\ProductExtractor;
 use Doctrine\ORM\EntityManagerInterface;
 use Predis\Client;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -13,47 +13,54 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'bookland-worker',
-    description: 'Process book products from the queue',
+    name: 'bonito:worker',
+    description: 'Process Bonito messages from the queue',
 )]
-
-class BookProductWorkerCommand extends Command
+class BonitoWorkerCommand extends Command
 {
-
-
-
-    private string $queue = 'book_product_queue';
-    private string $processed = 'book_product_processed';
+    private string $queue = 'bonito';
+    private string $processed = 'bonito:processed';
 
     public function __construct(
         private EntityManagerInterface $em,
         private Client $redis,
         private PageDownloader $downloader,
-        private ProductExtractor $extractor)
-    {
+        private BonitoExtractor $extractor
+    ) {
         parent::__construct();
-        $this->redis = $redis;
-        $this->em = $em;
-        $this->downloader = $downloader;
-        $this->extractor = $extractor;
     }
 
-    public function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         while (true) {
-            $item=$this->redis->brpoplpush(
+
+            $item = $this->redis->brpoplpush(
                 $this->queue,
                 $this->processed,
                 5
             );
 
-            if(!$item){
+            if (!$item) {
                 continue;
             }
 
             $data = json_decode($item, true);
 
-            $product = $this->em->getRepository(ProductBook::class)->find($data['id']);
+            if (!$data || !isset($data['id'])) {
+                $output->writeln('Invalid message');
+
+                $this->redis->lrem(
+                    $this->processed,
+                    1,
+                    $item
+                );
+
+                continue;
+            }
+
+            $product = $this->em
+                ->getRepository(Bonito::class)
+                ->find($data['id']);
 
             if (!$product) {
                 $this->redis->lrem(
@@ -61,44 +68,45 @@ class BookProductWorkerCommand extends Command
                     1,
                     $item
                 );
+
                 continue;
             }
 
-            try{
+            try {
+
                 $output->writeln('Product download ' .$product->getUrl());
 
                 $product->setStatus('processing');
 
-                $html=$this->downloader->download(
+                $this->em->flush();
+
+                $html = $this->downloader->download(
                     $product->getUrl()
                 );
 
-                $data = $this->extractor->extract($html);
-
+                $result = $this->extractor->extract($html);
 
                 $product->setTytul(
-                    $data['tytul'] ?? 'Brak tytułu'
+                    $result['tytul'] ?? ''
                 );
 
                 $product->setAutor(
-                    $data['autor'] ?? null
+                    $result['autor'] ?? ''
                 );
 
                 $product->setWydawnictwo(
-                    $data['wydawnictwo'] ?? null
+                    $result['wydawnictwo'] ?? ''
                 );
 
                 $product->setRokWydania(
-                    $data['rok_wydania'] ?? null
+                    $result['rok'] ?? null
                 );
 
                 $product->setCena(
-                    $data['cena'] ?? null
+                    $result['cena'] ?? '0'
                 );
 
-
                 $product->setStatus('done');
-
 
                 $this->em->flush();
 
@@ -111,34 +119,31 @@ class BookProductWorkerCommand extends Command
 
 
                 $this->redis->del(
-                    "book_product:" . $product->getId()
+                    "book-product:" . $product->getId()
                 );
 
+                $output->writeln(
+                    "OK: {$product->getId()}"
+                );
 
-                $output->writeln('OK');
+            } catch (\Throwable $e) {
 
-            }catch(\Exception $e){
+                $output->writeln(
+                    "ERROR: " . $e->getMessage()
+                );
 
                 $product->setStatus('error');
 
                 $this->em->flush();
-
-                $output->writeln($e->getMessage());
 
                 $this->redis->lrem(
                     $this->processed,
                     1,
                     $item
                 );
-
-                continue;
-
             }
-
-
         }
 
         return Command::SUCCESS;
     }
-
 }
