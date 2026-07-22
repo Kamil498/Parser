@@ -14,64 +14,80 @@ use Symfony\Component\Console\Output\OutputInterface;
     name: 'book:tania-ksiazka-producer',
     description: 'Tania producer command',
 )]
-
 class TaniaProducerCommand extends Command
 {
-
-    private string $queue="tania-ksiazka-queue";
+    private string $queue = 'tania-ksiazka-queue';
 
     public function __construct(
         private EntityManagerInterface $em,
         private Client $redis,
-    )
-    {
+    ) {
         parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $item = $this->em->getRepository(TaniaKsiazka::class)->findBy([
-            'status'=>"pending"
+        $items = $this->em->getRepository(TaniaKsiazka::class)->findBy([
+            'status' => 'pending',
         ]);
 
-        if(!$item){
-            $output->writeln("No books to process");
+        if (count($items) === 0) {
+            $output->writeln('<comment>No books to process.</comment>');
             return Command::SUCCESS;
         }
 
-        $queued=0;
+        $output->writeln(sprintf('Found %d pending books.', count($items)));
 
-        foreach($item as $book){
+        $queued = 0;
 
-            $LockKey="book:". $book->getId();
+        foreach ($items as $book) {
 
-            $locked=$this->redis->set(
-                $LockKey,
+            $lockKey = 'book:' . $book->getId();
+
+            $locked = $this->redis->set(
+                $lockKey,
                 1,
                 'EX',
                 3600,
                 'NX'
             );
 
-            if($locked){
+            if (!$locked) {
+                $output->writeln(
+                    sprintf(
+                        '<comment>Book #%d skipped (already locked).</comment>',
+                        $book->getId()
+                    )
+                );
+
                 continue;
             }
 
-            $payload=[
-                'id'=>$book->getId(),
-                'url'=>$book->getUrl(),
-                'shop'=>$book->getShop()
+            $payload = [
+                'id'   => $book->getId(),
+                'url'  => $book->getUrl(),
+                'shop' => $book->getShop(),
             ];
 
-            $this->redis->rpush(
+            $queueSize = $this->redis->rpush(
                 $this->queue,
-                json_encode($payload)
+                json_encode($payload, JSON_UNESCAPED_UNICODE)
             );
 
             $queued++;
 
+            $output->writeln(
+                sprintf(
+                    '<info>Queued book #%d (queue size: %d)</info>',
+                    $book->getId(),
+                    $queueSize
+                )
+            );
         }
-        $output->writeln("Queued $queued books");
+
+        $output->writeln('');
+        $output->writeln("<info>Queued {$queued} book(s).</info>");
+
         return Command::SUCCESS;
     }
 }

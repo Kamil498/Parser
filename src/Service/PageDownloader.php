@@ -17,6 +17,20 @@ class PageDownloader
 
             $html = $client->getPageSource();
 
+            $encoding = mb_detect_encoding(
+                $html,
+                ['UTF-8', 'ISO-8859-1', 'Windows-1250'],
+                true
+            );
+
+            if ($encoding && $encoding !== 'UTF-8') {
+                $html = mb_convert_encoding(
+                    $html,
+                    'UTF-8',
+                    $encoding
+                );
+            }
+
             return $html;
 
         } finally {

@@ -4,11 +4,8 @@ namespace App\Enum;
 
 enum Shop: String{
     case EMPIK='Empik';
-    case ALLEGRO = 'Allegro';
     case BONITO = 'Bonito';
-    case TANTIS = 'Tantis';
-    case SWIAT_KSIAZKI = 'Świat Książki';
-    case AMAZON = 'Amazon';
+    case TANIAKSIAZKA = 'tania ksiazka';
     case BOOKLAND = 'Bookland';
 
 
@@ -19,11 +16,8 @@ public static function fromUrl(string $url): self
 
     return match ($host) {
         'empik.com' => self::EMPIK,
-        'allegro.pl' => self::ALLEGRO,
         'bonito.pl' => self::BONITO,
-        'tantis.pl' => self::TANTIS,
-        'swiatksiazki.pl' => self::SWIAT_KSIAZKI,
-        'amazon.com' => self::AMAZON,
+        'taniaksiazka.pl' => self::TANIAKSIAZKA,
         'bookland.com.pl' => self::BOOKLAND,
         default => throw new \InvalidArgumentException(
             'Nieobsługiwany sklep: '.$host

@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Bonito;
 use App\Entity\Book;
+use App\Entity\Empik;
 use App\Entity\ProductBook;
+use App\Entity\TaniaKsiazka;
 use App\Enum\Shop;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
@@ -72,7 +74,7 @@ class AddBookController extends AbstractController
                 'message' => $e->getMessage()
             ], 400);
         }
-        $exists=$em->getRepository(Bonito::class)->findOneBy(['url' => $data['url']]);
+        $exists=$em->getRepository(TaniaKsiazka::class)->findOneBy(['url' => $data['url']]);
 
         if($exists)
         {
@@ -86,7 +88,7 @@ class AddBookController extends AbstractController
 
 
 
-        $book = new Bonito();
+        $book = new TaniaKsiazka();
 
         $book->setUrl($data['url']);
         $book->setShop($shop->value);

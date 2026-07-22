@@ -35,7 +35,7 @@ class EmpikWorkerCommand extends Command
     {
 
         while(true){
-            $item=$this->brpoplpush(
+            $item=$this->redis->brpoplpush(
                 $this->queue,
                 $this->processed,
                 5
@@ -66,6 +66,7 @@ class EmpikWorkerCommand extends Command
                 $product->setStatus("processing");
 
                 $html=$this->downloader->download($data['url']);
+                file_put_contents('/tmp/empik.html', $html);
 
                 $data=$this->extractor->extract($html);
 
