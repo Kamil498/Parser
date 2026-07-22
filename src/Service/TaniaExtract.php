@@ -6,27 +6,20 @@ use Symfony\Component\DomCrawler\Crawler;
 
 class TaniaExtract
 {
+    public function extract(string $html): array
+    {
+        $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
 
-    public function extract(string $html): array{
-        $crawler = new Crawler($html);
+        $crawler = new Crawler();
 
         $crawler->addHtmlContent($html, 'UTF-8');
+
         return [
-
-            'cena'=>$this->extractCena(
-                $crawler),
-            'tytul' => $this->extractTytul(
-                $crawler,
-                'h1'),
-
-            'autor'=>$this->extractAutor(
-                $crawler),
-
-            'wydawnictwo'=>$this->extractWydawnictwo(
-                $crawler),
-
-            'rok_wydania'=>$this->extractRok(
-                $crawler),
+            'cena' => $this->extractCena($crawler),
+            'tytul' => $this->extractTytul($crawler),
+            'autor' => $this->extractAutor($crawler),
+            'wydawnictwo' => $this->extractWydawnictwo($crawler),
+            'rok_wydania' => $this->extractRok($crawler),
         ];
     }
 
@@ -42,15 +35,17 @@ class TaniaExtract
         return $zl->text() . '.' . $gr->text();
     }
 
-    private function extractTytul(Crawler $crawler, string $selector): ?string
+    private function extractTytul(Crawler $crawler): ?string
     {
-        if ($crawler->filter($selector)->count() === 0) {
+        $nodes = $crawler->filterXPath(
+            '//h1[contains(@class, "product-info-title")]'
+        );
+
+        if ($nodes->count() === 0) {
             return null;
         }
 
-        return trim(
-            $crawler->filter($selector)->first()->text()
-        );
+        return trim($nodes->first()->text());
     }
 
     private function extractAutor(Crawler $crawler): ?string
@@ -71,7 +66,6 @@ class TaniaExtract
         $nodes = $crawler->filterXPath(
             '//tr[td[1][normalize-space()="Wydawnictwo:"]]/td[2]/a'
         );
-        dump($nodes->count());
 
         if ($nodes->count() === 0) {
             return null;
@@ -80,17 +74,16 @@ class TaniaExtract
         return trim($nodes->first()->text());
     }
 
-    private function extractRok(Crawler $crawler): ?string{
-        $nodes=$crawler->filterXPath(
-        '//tr[td[contains(text(), "Rok wydania:")]]/td[2]'
+    private function extractRok(Crawler $crawler): ?string
+    {
+        $nodes = $crawler->filterXPath(
+            '//tr[td[contains(text(), "Rok wydania:")]]/td[2]'
         );
+
         if ($nodes->count() === 0) {
             return null;
         }
 
-        return trim(
-            $nodes->first()->text()
-        );
-
+        return trim($nodes->first()->text());
     }
 }

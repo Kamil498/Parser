@@ -110,6 +110,8 @@ class BookPriceWorkerCommand extends Command
 
                 $this->em->clear();
 
+                $output->writeln('<info>OK</info>');
+
             } catch (\Throwable $e) {
 
                 $output->writeln(

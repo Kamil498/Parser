@@ -36,8 +36,6 @@ class TaniaProducerCommand extends Command
             return Command::SUCCESS;
         }
 
-        $output->writeln(sprintf('Found %d pending books.', count($items)));
-
         $queued = 0;
 
         foreach ($items as $book) {

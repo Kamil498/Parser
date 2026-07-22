@@ -7,6 +7,7 @@ use App\Service\PageDownloader;
 use App\Service\TaniaExtract;
 use Doctrine\ORM\EntityManagerInterface;
 use Predis\Client;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,11 +22,13 @@ class TaniaWorkerCommand extends Command
     private string $queue = 'tania-ksiazka-queue';
     private string $processed = 'tania-ksiazka-processed';
 
+
     public function __construct(
         private EntityManagerInterface $em,
         private Client $redis,
         private PageDownloader $downloader,
-        private TaniaExtract $extract
+        private TaniaExtract $extract,
+        private LoggerInterface $logger
     ) {
         parent::__construct();
     }
@@ -109,6 +112,10 @@ class TaniaWorkerCommand extends Command
 
                 $product->setStatus('done');
 
+                $this->logger->info('Tytuł przed zapisem', [
+                    'title' => $product->getTytul(),
+                ]);
+
                 $this->em->flush();
 
                 $this->redis->lrem(
@@ -123,11 +130,8 @@ class TaniaWorkerCommand extends Command
 
                 $output->writeln('<info>OK</info>');
 
+
             } catch (\Throwable $e) {
-
-
-                dump($e);
-                die();
 
                 $product->setStatus('error');
                 $this->em->flush();
