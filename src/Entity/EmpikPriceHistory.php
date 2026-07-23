@@ -15,11 +15,11 @@ class EmpikPriceHistory
     private ?int $id = null;
 
 
-    #[ORM\Column(length: 20, nullable: false)]
+    #[ORM\Column(length:20, nullable:true)]
     private ?string $ean = null;
 
 
-    #[ORM\Column(length: 50, nullable: false)]
+    #[ORM\Column(length:50, nullable:true)]
     private ?string $shop = null;
 
 
