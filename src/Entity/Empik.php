@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\EmpikRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: EmpikRepository::class)]
 class Empik
@@ -13,6 +15,9 @@ class Empik
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $ean = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $tytul = null;
@@ -41,6 +46,18 @@ class Empik
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getEan(): ?string
+    {
+        return $this->ean;
+    }
+
+    public function setEan(?string $ean): static
+    {
+        $this->ean = $ean;
+
+        return $this;
     }
 
     public function getTytul(): ?string
@@ -138,4 +155,9 @@ class Empik
 
         return $this;
     }
+    public function __construct()
+    {
+        $this->priceHistory = new ArrayCollection();
+    }
+
 }

@@ -11,7 +11,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
+use App\Entity\EmpikPriceHistory;
+use App\Service\PriceHistoryService;
 
 #[AsCommand(
     name: 'empik:worker',
@@ -26,7 +27,8 @@ class EmpikWorkerCommand extends Command
     public function __construct(private EntityManagerInterface $em,
                                    private Client $redis,
                                    private PageDownloader $downloader,
-                                   private EmpikExtractor $extractor )
+                                   private EmpikExtractor $extractor,
+                                   private PriceHistoryService $priceHistory)
     {
         parent::__construct();
     }
@@ -90,9 +92,17 @@ class EmpikWorkerCommand extends Command
                     $data['cena'] ?? null
                 );
 
+                $product->setEan(
+                    $data['ean'] ?? null
+                );
+
 
                 $product->setStatus('done');
 
+                $this->priceHistory->updateEmpikPrice(
+                    $product,
+                    $product->getCena()
+                );
 
                 $this->em->flush();
 

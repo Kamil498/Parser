@@ -74,7 +74,7 @@ class AddBookController extends AbstractController
                 'message' => $e->getMessage()
             ], 400);
         }
-        $exists=$em->getRepository(TaniaKsiazka::class)->findOneBy(['url' => $data['url']]);
+        $exists=$em->getRepository(Empik::class)->findOneBy(['url' => $data['url']]);
 
         if($exists)
         {
@@ -88,7 +88,7 @@ class AddBookController extends AbstractController
 
 
 
-        $book = new TaniaKsiazka();
+        $book = new Empik();
 
         $book->setUrl($data['url']);
         $book->setShop($shop->value);

@@ -11,6 +11,8 @@ class EmpikExtractor
         $crawler = new Crawler($html);
 
         return [
+            'ean' => $this->ean($crawler),
+
             'cena' => $this->cena($crawler),
 
             'rok_wydania' => $this->rok($crawler),
@@ -26,6 +28,21 @@ class EmpikExtractor
         ];
     }
 
+
+    private function ean(Crawler $crawler): ?string
+    {
+        $nodes = $crawler->filterXPath(
+            '//tr[th[normalize-space(.)="EAN:"]]/td/div'
+        );
+
+        if ($nodes->count() === 0) {
+            return null;
+        }
+
+        return $this->normalizeText(
+            $nodes->first()->text()
+        );
+    }
 
     private function cena(Crawler $crawler): ?float
     {
